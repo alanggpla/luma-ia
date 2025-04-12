@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Luma IA - Gemini</title>
+  <style>
+    body {
+      background: #1a0033;
+      color: #f8e1f4;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #ff80ab;
+      font-size: 2.5rem;
+    }
+    .chatbox {
+      width: 100%;
+      max-width: 700px;
+      background: #1b0036;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 20px #ff4081;
+    }
+    .chatlogs {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      padding-right: 10px;
+    }
+    .chat {
+      margin-bottom: 10px;
+    }
+    .user {
+      color: #c5f7ff;
+    }
+    .luma {
+      color: #ffc1e3;
+    }
+    input {
+      width: calc(100% - 100px);
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background: #310046;
+      color: #fff;
+      font-size: 1rem;
+    }
+    button {
+      width: 80px;
+      margin-left: 10px;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      background-color: #ff4081;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .input-area {
+      display: flex;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Luma IA</h1>
+  <div class="chatbox">
+    <div class="chatlogs" id="chatlogs"></div>
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Pergunte algo sobre programação...">
+      <button onclick="responderPergunta()">Enviar</button>
+    </div>
+  </div>
+
+  <script>
+    const API_KEY = "AIzaSyDe1WEcBCyniuzYtyCiv3oIwpktKLZ2634";
+
+    async function responderPergunta() {
+      const input = document.getElementById("userInput");
+      const pergunta = input.value.trim();
+      if (!pergunta) return;
+
+      const chatlogs = document.getElementById("chatlogs");
+      chatlogs.innerHTML += `<div class='chat user'><strong>Você:</strong> ${pergunta}</div>`;
+
+      const resposta = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + API_KEY, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: pergunta }] }]
+        })
+      })
+      .then(res => res.json())
+      .then(data => data.candidates?.[0]?.content?.parts?.[0]?.text || "Desculpe, não consegui responder agora.")
+      .catch(() => "Ocorreu um erro ao tentar responder.");
+
+      chatlogs.innerHTML += `<div class='chat luma'><strong>Luma:</strong> ${resposta}</div>`;
+      input.value = "";
+      chatlogs.scrollTop = chatlogs.scrollHeight;
+    }
+  </script>
+</body>
+</html>
